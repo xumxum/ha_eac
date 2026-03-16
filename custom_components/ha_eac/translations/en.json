@@ -1,0 +1,25 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "EAC Login",
+        "description": "Enter your EAC account credentials.",
+        "data": {
+          "username": "Username",
+          "password": "Password"
+        },
+        "data_description": {
+          "username": "Your EAC account username or email address.",
+          "password": "Your EAC account password."
+        }
+      }
+    },
+    "error": {
+      "invalid_auth": "Invalid username or password.",
+      "cannot_connect": "Failed to connect. Please try again."
+    },
+    "abort": {
+      "already_configured": "This account is already configured."
+    }
+  }
+}

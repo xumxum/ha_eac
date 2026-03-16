@@ -28,8 +28,7 @@ class EACConfigFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
         _errors = {}
 
         if user_input is not None:
-            return
-            #return self.async_create_entry( title=user_input[CONF_CITY], data=user_input )
+            return self.async_create_entry(title=user_input[CONF_USERNAME], data=user_input)
         if user_input is None:
             user_input = {}
 
