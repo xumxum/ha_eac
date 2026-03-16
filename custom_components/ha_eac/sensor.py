@@ -11,18 +11,13 @@ from homeassistant.components.sensor import (
     SensorStateClass,
 )
 
+from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
-from homeassistant.helpers.entity import EntityCategory
+from homeassistant.helpers.device_registry import DeviceInfo
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.typing import StateType
-from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
-from homeassistant.const import CONF_NAME
 from homeassistant.const import UnitOfEnergy
-from homeassistant.core import HomeAssistant
-
-
-from homeassistant.util.enum import try_parse_enum
 
 from .const import DEFAULT_NAME, DOMAIN
 #from .coordinator import CyprusWeatherUpdateCoordinator
@@ -64,7 +59,7 @@ async def async_setup_entry(
     for eac_sensor in eac_sensors:
         entities.append(
             EACSensor(
-                entry_id=entry.entry_id,
+                entry=entry,
                 description=eac_sensor,
             )
         )
@@ -81,30 +76,27 @@ class EACSensor(SensorEntity):
 
     def __init__(
         self,
-        entry_id: str,
+        entry: ConfigEntry,
         description: SensorEntityDescription
     ) -> None:
         
         """Initialize EACSensor."""
         self._name = description.name
+        self._entry = entry
 
         self.entity_id = (
             f"{SENSOR_DOMAIN}.{self._name}".lower()
         )
 
         self.description = description
+        self._attr_unique_id = f"{entry.entry_id}-{description.key}"
+        self._attr_device_info = DeviceInfo(
+            identifiers={(DOMAIN, entry.entry_id)},
+            name=DEFAULT_NAME,
+            manufacturer="EAC",
+        )
 
-        # self.entity_description = SensorEntityDescription(
-        #     key = self._name,
-        #     name=self._name,
-        #     native_unit_of_measurement = self.description['unit_of_measurement'],
-        #     device_class = try_parse_enum(SensorDeviceClass, description['device_class']),
-        #     state_class=SensorStateClass.MEASUREMENT,
-        # )  
-        # self._attr_unique_id = f"{entry_id}-{DEFAULT_NAME} {self._name}"
-        
         self._attributes = {}
-        #self._attributes['description'] = ''
 
         _LOGGER.debug(f"Setting up EACSensor: name: {self._name} key: {self.description.key} device_class: {self.description.device_class}")
 
