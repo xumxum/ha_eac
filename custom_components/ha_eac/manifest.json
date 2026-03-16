@@ -1,0 +1,12 @@
+{
+  "domain": "ha_eac",
+  "name": "EAC",
+  "version": "0.0.1",
+  "documentation": "https://github.com/xumxum/ha_eac",
+  "requirements": [],
+  "dependencies": [],
+  "codeowners": ["xumxum"],
+  "issue_tracker": "https://github.com/xumxum/ha_eac/issues",
+  "config_flow": true,
+  "icon": "mdi:weather-sunny"
+}
