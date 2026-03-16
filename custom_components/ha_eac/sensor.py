@@ -18,7 +18,7 @@ from homeassistant.helpers.typing import StateType
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
 from homeassistant.const import CONF_NAME
-#from homeassistant.const import UnitOfTemperature
+from homeassistant.const import UnitOfEnergy
 from homeassistant.core import HomeAssistant
 
 
@@ -35,14 +35,14 @@ eac_sensors: list[SensorEntityDescription] = [
     SensorEntityDescription(
         key="Consumption",
         name="Consumption",
-        native_unit_of_measurement=UnitOfTemperature.CELSIUS,
+        native_unit_of_measurement=UnitOfEnergy.KILO_WATT_HOUR,
         device_class=SensorDeviceClass.ENERGY,
         state_class=SensorStateClass.MEASUREMENT,
     ),
     SensorEntityDescription(
         key="Production",
         name="Production",
-        native_unit_of_measurement=UnitOfTemperature.CELSIUS,
+        native_unit_of_measurement=UnitOfEnergy.KILO_WATT_HOUR,
         device_class=SensorDeviceClass.ENERGY,
         state_class=SensorStateClass.MEASUREMENT,
     )
@@ -92,7 +92,7 @@ class EACSensor(SensorEntity):
             f"{SENSOR_DOMAIN}.{self._name}".lower()
         )
 
-        #self.description = description
+        self.description = description
 
         # self.entity_description = SensorEntityDescription(
         #     key = self._name,
@@ -103,10 +103,10 @@ class EACSensor(SensorEntity):
         # )  
         # self._attr_unique_id = f"{entry_id}-{DEFAULT_NAME} {self._name}"
         
-        # self._attributes = {}
-        # self._attributes['description'] = description['description']
+        self._attributes = {}
+        #self._attributes['description'] = ''
 
-        _LOGGER.debug(f"Setting up EACSensor: name: {self._name} key: {self.entity_description.key} device_class: {self.entity_description.device_class}")
+        _LOGGER.debug(f"Setting up EACSensor: name: {self._name} key: {self.description.key} device_class: {self.description.device_class}")
 
     @property
     def native_value(self) -> StateType:
