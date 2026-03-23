@@ -24,21 +24,24 @@ class EACUpdateCoordinator(DataUpdateCoordinator):
         self._email = email
         self._password = password
         self._hass = hass
+        self._last_reading = {}
 
         super().__init__(
             hass=hass, logger=_LOGGER, name=DOMAIN, update_interval=SCAN_INTERVAL
         )
         self._eac_client = EACClient(email, password)
 
-    async def _async_update_data(self) -> dict[str, Any]:
+
+    async def _async_update_data(self):
         """Update data """
         try:
-            rez = {}
+            rez = []
             # #both data, same dictionary under different keys
             # _LOGGER.debug("Get the latest data from cyprus-weather.org for %s ", self._city)
             # newWeatherData = await self._hass.async_add_executor_job(get_weather_data,self._city)
             # rez[WEATHER_KEY] = newWeatherData
-
+            rez = await self._hass.async_add_executor_job(EACClient.fetchMetersData, self._eac_client)
+            self._last_reading = rez
             # _LOGGER.debug("Get the latest data from www.airquality.dli.mlsi.gov.cy for %s ", self._city)
             # newAirQualityData = await self._hass.async_add_executor_job(get_air_quality_data,self._city)
             # rez[AIR_QUALITY_KEY] = newAirQualityData
@@ -47,6 +50,10 @@ class EACUpdateCoordinator(DataUpdateCoordinator):
         except Exception as exception:
             _LOGGER.error("Update failed! - %s", exception)
             raise UpdateFailed() from exception
+        
+    async def get_latest_data(self) -> list[EACClient.ActiveMeterReading]:
+        return self._last_reading
+
 
     # def get_weather_value( self, key: str ) -> float | int | str | None:
     #     if self.data and WEATHER_KEY in self.data and key in self.data[WEATHER_KEY]:

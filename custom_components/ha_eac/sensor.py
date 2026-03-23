@@ -26,22 +26,22 @@ from .const import DEFAULT_NAME, DOMAIN
 _LOGGER = logging.getLogger(__name__)
 
 
-eac_sensors: list[SensorEntityDescription] = [
-    SensorEntityDescription(
-        key="Consumption",
-        name="Consumption",
-        native_unit_of_measurement=UnitOfEnergy.KILO_WATT_HOUR,
-        device_class=SensorDeviceClass.ENERGY,
-        state_class=SensorStateClass.MEASUREMENT,
-    ),
-    SensorEntityDescription(
-        key="Production",
-        name="Production",
-        native_unit_of_measurement=UnitOfEnergy.KILO_WATT_HOUR,
-        device_class=SensorDeviceClass.ENERGY,
-        state_class=SensorStateClass.MEASUREMENT,
-    )
-]
+# eac_sensors: list[SensorEntityDescription] = [
+#     SensorEntityDescription(
+#         key="Consumption",
+#         name="Consumption",
+#         native_unit_of_measurement=UnitOfEnergy.KILO_WATT_HOUR,
+#         device_class=SensorDeviceClass.ENERGY,
+#         state_class=SensorStateClass.MEASUREMENT,
+#     ),
+#     SensorEntityDescription(
+#         key="Production",
+#         name="Production",
+#         native_unit_of_measurement=UnitOfEnergy.KILO_WATT_HOUR,
+#         device_class=SensorDeviceClass.ENERGY,
+#         state_class=SensorStateClass.MEASUREMENT,
+#     )
+# ]
 
 
 async def async_setup_entry(
@@ -50,19 +50,37 @@ async def async_setup_entry(
     async_add_entities: AddEntitiesCallback,
 ) -> None:
     """Set up EAC sensors based on a config entry."""
-    #coordinator = hass.data[DOMAIN][entry.entry_id]
-    #city = entry.data.get(CONF_CITY)
+    coordinator = hass.data[DOMAIN][entry.entry_id]
+    
 
     entities= []
 
-    # Add all meter sensors described above.
-    for eac_sensor in eac_sensors:
+    # # Add all meter sensors described above.
+    # for eac_sensor in eac_sensors:
+    #     entities.append(
+    #         EACSensor(
+    #             entry=entry,
+    #             description=eac_sensor,
+    #         )
+    #     )
+
+    d = await coordinator.get_latest_data()
+    for r in d:
+        #_LOGGER.debug(f"Creating sensor for spId {r.spId} with data: {r.info}")
+        
+        address = r.info['address']
+        name = f"EAC Consumption {address}"
         entities.append(
             EACSensor(
                 entry=entry,
-                description=eac_sensor,
-            )
-        )
+                description=SensorEntityDescription(
+                    key=f"Consumption_{r.spId}",
+                    name=name,
+                    native_unit_of_measurement=UnitOfEnergy.KILO_WATT_HOUR,
+                    device_class=SensorDeviceClass.ENERGY,
+                    state_class=SensorStateClass.MEASUREMENT,
+                )
+
 
     async_add_entities(entities)
 
