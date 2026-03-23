@@ -19,6 +19,14 @@ class EACClient:
         spId: str
         mcId_Exp: str = None
         mcId_Imp: str = None
+        info: dict = None
+
+    @dataclass
+    class ActiveMeterReading:
+        spId: str
+        exp: int = None
+        imp: int = None
+        info: dict = None
 
     def __init__(self, email, password):
         self.base_url = "https://meterreading-dso.eac.com.cy/api/portal/"
@@ -150,7 +158,7 @@ class EACClient:
     #   'readings': [{'dt': '2026-02-01T00:00:00', 'reading': 1873.0, 'value': 14.0},
     #                {'dt': '2026-02-02T00:00:00', 'reading': 1887.0, 'value': 14.0},
     #                {'dt': '2026-02-03T00:00:00', 'reading': 1896.0, 'value': 9.0},
-    def meterReadings(self):
+    def fetchLastMeterReading(self, spId: str, mcId: str):
         """
         Get meter readings for a specific service point, meter, configuration, and measurement
         """
@@ -158,15 +166,24 @@ class EACClient:
         start_date = end_date - timedelta(hours=48)
         
         payload = {
-            "spId": self.spId,
-            "mcId": self.mcId,
+            "spId": spId,
+            "mcId": mcId,
             "startDate": start_date.strftime("%Y-%m-%dT%H:%M:%S.000Z"),
             "endDate": end_date.strftime("%Y-%m-%dT%H:%M:%S.000Z")
         }
         data = self.api_call("readings/list", method='POST', req_data=payload)
-        # if data:
-        #     pprint(data)
-        return data
+        #if data:
+        #    print(data)
+        if data:
+            _LOGGER.debug(f"Meter Readings Data for spId {spId} mcId {mcId}: {data}")
+            if len(data) > 0:
+                rd = data[0]
+                if 'readings' in rd and len(rd['readings']) > 0:
+                    if 'reading' in rd['readings'][-1] :
+                        latest_reading = rd['readings'][-1]['reading']
+                        return latest_reading
+
+        return None
 
     
     def fetchActiveMeters(self):
@@ -181,6 +198,7 @@ class EACClient:
                 sp_id = sp.get('id')
     
                 service_point_data = self.servicePoints(service_point_id=sp_id)
+                #print(f"Service point data: {service_point_data}")
             
                 for meter in service_point_data:
                     active_status = True
@@ -207,14 +225,38 @@ class EACClient:
                                         #print("    → Found active S-KWH-NET-EXP-MMTR measurement, ID:", active_measurement_id)
                                         active_meter.mcId_Exp = active_measurement_id
 
-                                if active_meter.mcId_Exp or active_meter.mcId_Imp:                                
+                                if active_meter.mcId_Exp or active_meter.mcId_Imp:
+                                    active_meter.info = sp
                                     activeMeters.append(active_meter)
 
         if not activeMeters:
             _LOGGER.error("No active service point found!")
-            return
+            return False
         
+        self.active_meters = activeMeters
+        return True
+        
+    def fetchMetersData(self):
+        if not self.active_meters:
+            if not self.fetchActiveMeters():
+                return None
+        
+        meters_data = []
+        for meter in self.active_meters:
+            spId = meter.spId
+            mcId_Exp = meter.mcId_Exp
+            mcId_Imp = meter.mcId_Imp
 
+            reading = self.ActiveMeterReading(spId=spId)
+            reading.info = meter.info
+            if mcId_Exp:
+                reading.exp = self.fetchLastMeterReading(spId, mcId_Exp)
+            if mcId_Imp:
+                reading.imp = self.fetchLastMeterReading(spId, mcId_Imp)
+
+            meters_data.append(reading)
+        
+        return meters_data
     
 
 # # Usage Example
