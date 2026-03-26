@@ -28,7 +28,7 @@ class EACClient:
         imp: int = None
         info: dict = None
 
-    def __init__(self, email, password):
+    def __init__(self, username, password):
         self.base_url = "https://meterreading-dso.eac.com.cy/api/portal/"
         self.session = requests.Session()
         self.session.headers.update({
@@ -36,7 +36,7 @@ class EACClient:
             'Content-Type': 'application/json',
             'Accept': 'application/json',
         })
-        self.email = email
+        self.username = username
         self.password = password
         self.jwt_token = None
         self.active_meters: list[EACClient.ActiveMeter] = []
@@ -47,7 +47,7 @@ class EACClient:
         Login to EAC portal and store JWT token
         """
         payload = {
-            "email": self.email,
+            "email": self.username,
             "password": self.password
         }
         
