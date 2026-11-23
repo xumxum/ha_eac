@@ -55,6 +55,27 @@ class EACUpdateCoordinator(DataUpdateCoordinator):
         return self._last_reading
 
 
+    def get_meter_value( self, key: str ) -> float | int | str | None:
+        
+        spId, sen = key.split("_")
+        if spId is None or sen is None:
+            _LOGGER.debug("Invalid key!", key)
+            return None
+        
+        for r in self._last_reading:
+            if r.spId == spId:
+                if sen == "imp":
+                    return r.imp
+                elif sen == "exp":
+                    return r.exp
+                else:
+                    _LOGGER.debug("Value %s is missing in API response", key)
+                    return None
+
+
+        _LOGGER.debug("Value %s is missing in API response", key)
+        return None
+
     # def get_weather_value( self, key: str ) -> float | int | str | None:
     #     if self.data and WEATHER_KEY in self.data and key in self.data[WEATHER_KEY]:
     #         return self.data[WEATHER_KEY].get(key, None)

@@ -68,21 +68,44 @@ async def async_setup_entry(
     for r in d:
         #_LOGGER.debug(f"Creating sensor for spId {r.spId} with data: {r.info}")
         
-        address = r.info['address']
-        name = f"EAC Consumption {address}"
-        entities.append(
-            EACSensor(
-                entry=entry,
-                description=SensorEntityDescription(
-                    key=f"Consumption_{r.spId}",
-                    name=name,
-                    native_unit_of_measurement=UnitOfEnergy.KILO_WATT_HOUR,
-                    device_class=SensorDeviceClass.ENERGY,
-                    state_class=SensorStateClass.MEASUREMENT
+        spId = r.spId
+        #address = r.info['address']
+        last_four_digits = r.spId[-4:] 
+        #name = f"Consumption {last_four_digits}"
+
+        if r.imp is not None:        
+            name = f"Consumption {last_four_digits}"
+            
+            entities.append(
+                EACSensor(
+                    entry=entry,
+                    coordinator=coordinator,
+                    description=SensorEntityDescription(
+                        key=f"{spId}_imp",
+                        name=name,
+                        device_class=SensorDeviceClass.ENERGY,
+                        state_class=SensorStateClass.TOTAL_INCREASING,
+                        native_unit_of_measurement="kWh",
+                    )
                 )
             )
-        )
+
+        if r.exp is not None:
+            name = f"Production {last_four_digits}"
             
+            entities.append(
+                EACSensor(
+                    entry=entry,
+                    coordinator=coordinator,
+                    description=SensorEntityDescription(
+                        key=f"{spId}_exp",
+                        name=name,
+                        device_class=SensorDeviceClass.ENERGY,
+                        state_class=SensorStateClass.TOTAL_INCREASING,
+                        native_unit_of_measurement="kWh",
+                    )
+                )
+            )
 
 
     async_add_entities(entities)
@@ -98,11 +121,13 @@ class EACSensor(SensorEntity):
     def __init__(
         self,
         entry: ConfigEntry,
+        coordinator: EACUpdateCoordinator,
         description: SensorEntityDescription
     ) -> None:
         
         """Initialize EACSensor."""
         self._name = description.name
+        self.coordinator = coordinator
         self._entry = entry
 
         self.description = description
@@ -118,15 +143,14 @@ class EACSensor(SensorEntity):
 
         _LOGGER.debug(f"Setting up EACSensor: name: {self._name} key: {self.description.key} device_class: {self.description.device_class}")
 
-        
+
     @property
     def native_value(self) -> StateType:
         """Return the state of the sensor."""
         # d = self.coordinator.get_air_quality_value(self.entity_description.key)
         # if d and 'value' in d:
         #     return d['value']
-        return 123
-        return None
+        return self.coordinator.get_meter_value(self.description.key)
 
         
     @property
