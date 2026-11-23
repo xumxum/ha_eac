@@ -78,8 +78,11 @@ async def async_setup_entry(
                     name=name,
                     native_unit_of_measurement=UnitOfEnergy.KILO_WATT_HOUR,
                     device_class=SensorDeviceClass.ENERGY,
-                    state_class=SensorStateClass.MEASUREMENT,
+                    state_class=SensorStateClass.MEASUREMENT
                 )
+            )
+        )
+            
 
 
     async_add_entities(entities)
@@ -102,11 +105,8 @@ class EACSensor(SensorEntity):
         self._name = description.name
         self._entry = entry
 
-        self.entity_id = (
-            f"{SENSOR_DOMAIN}.{self._name}".lower()
-        )
-
         self.description = description
+        self.entity_description = description
         self._attr_unique_id = f"{entry.entry_id}-{description.key}"
         self._attr_device_info = DeviceInfo(
             identifiers={(DOMAIN, entry.entry_id)},
@@ -118,6 +118,7 @@ class EACSensor(SensorEntity):
 
         _LOGGER.debug(f"Setting up EACSensor: name: {self._name} key: {self.description.key} device_class: {self.description.device_class}")
 
+        
     @property
     def native_value(self) -> StateType:
         """Return the state of the sensor."""
