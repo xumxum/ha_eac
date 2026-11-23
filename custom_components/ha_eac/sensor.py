@@ -80,6 +80,7 @@ async def async_setup_entry(
                 EACSensor(
                     entry=entry,
                     coordinator=coordinator,
+                    info=r.info,
                     description=SensorEntityDescription(
                         key=f"{spId}_imp",
                         name=name,
@@ -97,6 +98,7 @@ async def async_setup_entry(
                 EACSensor(
                     entry=entry,
                     coordinator=coordinator,
+                    info=r.info,
                     description=SensorEntityDescription(
                         key=f"{spId}_exp",
                         name=name,
@@ -122,6 +124,7 @@ class EACSensor(SensorEntity):
         self,
         entry: ConfigEntry,
         coordinator: EACUpdateCoordinator,
+        info: dict,
         description: SensorEntityDescription
     ) -> None:
         
@@ -129,6 +132,7 @@ class EACSensor(SensorEntity):
         self._name = description.name
         self.coordinator = coordinator
         self._entry = entry
+        self._info = info
 
         self.description = description
         self.entity_description = description
@@ -137,9 +141,14 @@ class EACSensor(SensorEntity):
             identifiers={(DOMAIN, entry.entry_id)},
             name=DEFAULT_NAME,
             manufacturer="EAC",
+            serial_number=info.get("serialNumber", None) if info else None,
         )
 
-        self._attributes = {}
+        self._attributes = {
+            "address": info.get("address", None) if info else None,
+            "meter_id": info.get("id", None) if info else None
+        }
+
 
         _LOGGER.debug(f"Setting up EACSensor: name: {self._name} key: {self.description.key} device_class: {self.description.device_class}")
 
