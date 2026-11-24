@@ -5,8 +5,6 @@ from datetime import timedelta
 NAME = "EAC"
 DOMAIN = "ha_eac"
 
-#CONF_CITY = "city"
-
 # Defaults
-DEFAULT_NAME = NAME
-SCAN_INTERVAL: timedelta = timedelta(seconds=60*30)
+# Scan interval for updating sensor data. Default is 2 hours, even though EAC updates just daily.
+SCAN_INTERVAL: timedelta = timedelta(seconds=60*60*2)

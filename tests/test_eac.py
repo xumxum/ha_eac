@@ -26,3 +26,5 @@ def test_eac_fetch_data(client):
     data = client.fetchMetersData()
     pprint(data)
     assert data is not None
+    assert data.spId is not None
+    assert data.imp is not None

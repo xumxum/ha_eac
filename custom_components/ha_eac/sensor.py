@@ -19,29 +19,11 @@ from homeassistant.helpers.typing import StateType
 
 from homeassistant.const import UnitOfEnergy
 
-from .const import DEFAULT_NAME, DOMAIN
-#from .coordinator import CyprusWeatherUpdateCoordinator
-#from .air_quality import get_air_quality_parameters
+from .const import NAME,DOMAIN
+from .coordinator import EACUpdateCoordinator
 
 _LOGGER = logging.getLogger(__name__)
 
-
-# eac_sensors: list[SensorEntityDescription] = [
-#     SensorEntityDescription(
-#         key="Consumption",
-#         name="Consumption",
-#         native_unit_of_measurement=UnitOfEnergy.KILO_WATT_HOUR,
-#         device_class=SensorDeviceClass.ENERGY,
-#         state_class=SensorStateClass.MEASUREMENT,
-#     ),
-#     SensorEntityDescription(
-#         key="Production",
-#         name="Production",
-#         native_unit_of_measurement=UnitOfEnergy.KILO_WATT_HOUR,
-#         device_class=SensorDeviceClass.ENERGY,
-#         state_class=SensorStateClass.MEASUREMENT,
-#     )
-# ]
 
 
 async def async_setup_entry(
@@ -51,30 +33,20 @@ async def async_setup_entry(
 ) -> None:
     """Set up EAC sensors based on a config entry."""
     coordinator = hass.data[DOMAIN][entry.entry_id]
-    
-
+  
     entities= []
 
-    # # Add all meter sensors described above.
-    # for eac_sensor in eac_sensors:
-    #     entities.append(
-    #         EACSensor(
-    #             entry=entry,
-    #             description=eac_sensor,
-    #         )
-    #     )
-
-    d = await coordinator.get_latest_data()
-    for r in d:
-        #_LOGGER.debug(f"Creating sensor for spId {r.spId} with data: {r.info}")
+    meter_readings = await coordinator.get_latest_data()
+    for r in meter_readings:
+        _LOGGER.debug(f"Creating sensors for spId {r.spId} with data: {r.info}")
         
         spId = r.spId
-        #address = r.info['address']
-        last_four_digits = r.spId[-4:] 
-        #name = f"Consumption {last_four_digits}"
+        #last_four_digits = r.spId[-4:] 
+
+        # POV Of the user, imported energy is what we consume, exported is what we give back to the grid from Solar Panels
 
         if r.imp is not None:        
-            name = f"Consumption {last_four_digits}"
+            name = "Consumption"
             
             entities.append(
                 EACSensor(
@@ -92,7 +64,7 @@ async def async_setup_entry(
             )
 
         if r.exp is not None:
-            name = f"Production {last_four_digits}"
+            name = "Production"
             
             entities.append(
                 EACSensor(
@@ -137,9 +109,10 @@ class EACSensor(SensorEntity):
         self.description = description
         self.entity_description = description
         self._attr_unique_id = f"{entry.entry_id}-{description.key}"
+        self._attr_has_entity_name = True
         self._attr_device_info = DeviceInfo(
             identifiers={(DOMAIN, entry.entry_id)},
-            name=DEFAULT_NAME,
+            name=f"{NAME} {info.get('id', '')}",
             manufacturer="EAC",
             serial_number=info.get("serialNumber", None) if info else None,
         )
@@ -156,9 +129,6 @@ class EACSensor(SensorEntity):
     @property
     def native_value(self) -> StateType:
         """Return the state of the sensor."""
-        # d = self.coordinator.get_air_quality_value(self.entity_description.key)
-        # if d and 'value' in d:
-        #     return d['value']
         return self.coordinator.get_meter_value(self.description.key)
 
         
