@@ -45,6 +45,15 @@ Install the repository through HACS:
 
 The integration creates sensors for all active meters associated with the account. Meters without solar production data receive only a consumption sensor.
 
+## Meter updates
+
+Data updates depend on EAC and are not controlled by this integration:
+
+- Smart meters are updated by EAC approximately every 24 hours.
+- Meters that are not smart meters are updated manually, only for each billing period, approximately every two months.
+
+Home Assistant can only retrieve and display the latest readings made available by EAC.
+
 ## Sensor usage
 
 The consumption and production sensors can be added to Home Assistant's Energy dashboard as:
