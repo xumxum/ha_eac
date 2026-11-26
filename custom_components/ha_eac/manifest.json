@@ -1,7 +1,7 @@
 {
   "domain": "ha_eac",
   "name": "EAC",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "documentation": "https://github.com/xumxum/ha_eac",
   "requirements": [],
   "dependencies": [],
