@@ -16,6 +16,7 @@ from homeassistant.core import HomeAssistant
 from homeassistant.helpers.device_registry import DeviceInfo
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.typing import StateType
+from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
 from homeassistant.const import UnitOfEnergy
 
@@ -87,7 +88,7 @@ async def async_setup_entry(
 
 
 
-class EACSensor(SensorEntity):
+class EACSensor(CoordinatorEntity[EACUpdateCoordinator], SensorEntity):
     """Defines a EACSensor ."""
 
     #_attr_has_entity_name = True
@@ -101,8 +102,8 @@ class EACSensor(SensorEntity):
     ) -> None:
         
         """Initialize EACSensor."""
+        super().__init__(coordinator)
         self._name = description.name
-        self.coordinator = coordinator
         self._entry = entry
         self._info = info
 

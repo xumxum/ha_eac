@@ -43,16 +43,16 @@ Install the repository through HACS:
 3. Search for **EAC**.
 4. Enter the username and password used at [meterreading-dso.eac.com.cy](https://meterreading-dso.eac.com.cy/login).
 
-The integration creates sensors for all active meters associated with the account. Meters without solar production data receive only a consumption sensor.
+The integration supports active smart meters associated with the account. Meters without solar production data receive only a consumption sensor.
 
 ## Meter updates
 
-Data updates depend on EAC and are not controlled by this integration:
+Only smart meters are supported. Reading updates depend on EAC and are not controlled by this integration:
 
-- Smart meters are updated by EAC approximately every 24 hours.
-- Meters that are not smart meters are updated manually, only for each billing period, approximately every two months.
+- EAC makes smart-meter readings available approximately every 24 hours.
+- Non-smart meters and manually submitted billing-period readings are not supported.
 
-Home Assistant can only retrieve and display the latest readings made available by EAC.
+The integration retrieves and displays the latest readings made available by EAC.
 
 ## Sensor usage
 

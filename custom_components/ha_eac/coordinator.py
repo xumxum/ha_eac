@@ -36,15 +36,10 @@ class EACUpdateCoordinator(DataUpdateCoordinator):
         """Update data """
         try:
             rez = []
-            # #both data, same dictionary under different keys
-            # _LOGGER.debug("Get the latest data from cyprus-weather.org for %s ", self._city)
-            # newWeatherData = await self._hass.async_add_executor_job(get_weather_data,self._city)
-            # rez[WEATHER_KEY] = newWeatherData
+
+            _LOGGER.debug("Getting the latest data from EAC")
             rez = await self._hass.async_add_executor_job(EACClient.fetchMetersData, self._eac_client)
             self._last_reading = rez
-            # _LOGGER.debug("Get the latest data from www.airquality.dli.mlsi.gov.cy for %s ", self._city)
-            # newAirQualityData = await self._hass.async_add_executor_job(get_air_quality_data,self._city)
-            # rez[AIR_QUALITY_KEY] = newAirQualityData
 
             return rez
         except Exception as exception:
